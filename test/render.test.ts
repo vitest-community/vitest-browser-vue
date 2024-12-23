@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 import { page } from '@vitest/browser/context'
 import { render } from '../src/index'
 import HelloWorld from './fixtures/HelloWorld.vue'
+import Slot from './fixtures/Slot.vue'
 import Counter from './fixtures/Counter.vue'
 
 test('renders simple component', async () => {
@@ -20,4 +21,13 @@ test('renders counter', async () => {
   await expect.element(screen.getByText('Count is 1')).toBeVisible()
   await screen.getByRole('button', { name: 'Increment' }).click()
   await expect.element(screen.getByText('Count is 2')).toBeVisible()
+})
+
+test('renders slot', async () => {
+  const screen = render(Slot, {
+    slots: {
+      default: 'Hello World',
+    },
+  })
+  await expect.element(screen.getByText('Hello World')).toBeVisible()
 })
