@@ -8,7 +8,11 @@ export default defineConfig({
     browser: {
       enabled: true,
       name: 'chromium',
+      headless: true,
       provider: 'playwright',
     },
+  },
+  optimizeDeps: {
+    include: ['vitest-browser-vue'],
   },
 })

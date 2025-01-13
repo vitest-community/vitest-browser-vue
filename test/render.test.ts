@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { page } from '@vitest/browser/context'
-import { render } from '../src/index'
+import { render } from 'vitest-browser-vue'
 import HelloWorld from './fixtures/HelloWorld.vue'
 import Slot from './fixtures/Slot.vue'
 import Counter from './fixtures/Counter.vue'
@@ -30,4 +30,13 @@ test('renders slot', async () => {
     },
   })
   await expect.element(screen.getByText('Hello World')).toBeVisible()
+})
+
+test('renders complex slot', async () => {
+  const screen = render(Slot, {
+    slots: {
+      default: '<button>Hello World</button>',
+    },
+  })
+  await expect.element(screen.getByRole('button', { name: 'Hello World' })).toBeVisible()
 })
