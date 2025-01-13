@@ -26,6 +26,7 @@ test('renders counter', async () => {
 test('renders slot', async () => {
   const screen = render(Slot, {
     slots: {
+      // TODO: using slots prints "decodeEntities option is passed but will be ignored in non-browser builds."
       default: 'Hello World',
     },
   })
