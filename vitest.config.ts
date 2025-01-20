@@ -7,9 +7,11 @@ export default defineConfig({
     name: 'vue',
     browser: {
       enabled: true,
-      name: 'chromium',
       headless: true,
       provider: 'playwright',
+      instances: [
+        { browser: 'chromium' },
+      ],
     },
   },
   optimizeDeps: {
