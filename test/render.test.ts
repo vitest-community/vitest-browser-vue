@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-vue'
 import HelloWorld from './fixtures/HelloWorld.vue'
 import Slot from './fixtures/Slot.vue'
 import Counter from './fixtures/Counter.vue'
+import Async from './fixtures/Async.vue'
 
 test('renders simple component', async () => {
   const screen = render(HelloWorld)
@@ -40,4 +41,14 @@ test('renders complex slot', async () => {
     },
   })
   await expect.element(screen.getByRole('button', { name: 'Hello World' })).toBeVisible()
+})
+
+test('renders async component', async () => {
+  const screen = render({
+    components: { Async },
+    // for some reason, @vue/test-utils can only render suspense
+    // if it's wrapped in another element (a div in this case)
+    template: `<div><Suspense><Async /></Suspense></div>`,
+  })
+  await expect.element(screen.getByText('Hello Async World')).toBeVisible()
 })
