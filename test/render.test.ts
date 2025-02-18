@@ -1,10 +1,16 @@
 import { expect, test } from 'vitest'
 import { page } from '@vitest/browser/context'
-import { render } from 'vitest-browser-vue'
+import { config, render } from 'vitest-browser-vue'
 import HelloWorld from './fixtures/HelloWorld.vue'
 import Slot from './fixtures/Slot.vue'
 import Counter from './fixtures/Counter.vue'
 import Async from './fixtures/Async.vue'
+
+config.global.components = {
+  InjectedGlobalComponent: {
+    template: '<div>Global Component</div>',
+  },
+}
 
 test('renders simple component', async () => {
   const screen = render(HelloWorld)
@@ -41,6 +47,13 @@ test('renders complex slot', async () => {
     },
   })
   await expect.element(screen.getByRole('button', { name: 'Hello World' })).toBeVisible()
+})
+
+test('injected component works', async () => {
+  const screen = render({
+    template: '<InjectedGlobalComponent />',
+  })
+  await expect.element(screen.getByText('Global Component')).toBeVisible()
 })
 
 test('renders async component', async () => {
