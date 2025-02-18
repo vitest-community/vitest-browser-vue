@@ -57,6 +57,18 @@ test('counter button increments the count', async () => {
 
 Unlike `@testing-library/vue`, `vitest-browser-vue` cleans up the component before the test starts instead of after, so you can see the rendered result in your UI. To avoid auto-cleanup, import the `render` function from `vitest-browser-vue/pure`.
 
+## Configuration
+
+You can change the global configuration by modifying the `config` export. You can import it from both `vitest-browser-vue` and `vitest-browser-vue/pure`. See [documentation](https://test-utils.vuejs.org/api/#config).
+
+```js
+import { config } from 'vitest-browser-vue'
+
+config.global.mocks = {
+  $t: text => text
+}
+```
+
 ## Special thanks
 
 - Powered by [`@vue/test-utils`](https://github.com/vuejs/test-utils/)

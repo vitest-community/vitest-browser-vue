@@ -3,6 +3,8 @@ import { type ComponentMountingOptions, type VueWrapper, mount } from '@vue/test
 import type { DefineComponent } from 'vue'
 import { type PrettyDOMOptions, debug, getElementLocatorSelectors } from '@vitest/browser/utils'
 
+export { config } from '@vue/test-utils'
+
 type ComponentProps<T> = T extends new (...angs: any) => {
   $props: infer P
 // eslint-disable-next-line ts/no-empty-object-type
