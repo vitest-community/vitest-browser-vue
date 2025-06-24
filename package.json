@@ -52,8 +52,8 @@
     "lint:fix": "pnpm lint --fix"
   },
   "peerDependencies": {
-    "@vitest/browser": "^2.1.0 || ^3.0.0-0",
-    "vitest": "^2.1.0 || ^3.0.0-0",
+    "@vitest/browser": "^2.1.0 || ^3.0.0 || ^4.0.0-0",
+    "vitest": "^2.1.0 || ^3.0.0 || ^4.0.0-0",
     "vue": "^3.0.0"
   },
   "dependencies": {
