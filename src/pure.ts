@@ -1,4 +1,5 @@
 import type { Locator, LocatorSelectors } from '@vitest/browser/context'
+import { page } from '@vitest/browser/context'
 import { type ComponentMountingOptions, type VueWrapper, mount } from '@vue/test-utils'
 import type { DefineComponent } from 'vue'
 import { type PrettyDOMOptions, debug, getElementLocatorSelectors } from '@vitest/browser/utils'
@@ -15,6 +16,7 @@ const mountedWrappers = new Set<VueWrapper>()
 export interface RenderResult<Props> extends LocatorSelectors {
   container: HTMLElement
   baseElement: HTMLElement
+  locator: Locator
   debug(el?: HTMLElement | HTMLElement[] | Locator | Locator[], maxLength?: number, options?: PrettyDOMOptions): void
   unmount(): void
   emitted<T = unknown>(): Record<string, T[]>
@@ -61,6 +63,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
   return {
     container,
     baseElement,
+    locator: page.elementLocator(container),
     debug: (el = baseElement, maxLength, options) => debug(el, maxLength, options),
     unmount: () => wrapper.unmount(),
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
