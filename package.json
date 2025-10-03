@@ -29,7 +29,8 @@
     "./pure": {
       "types": "./dist/pure.d.ts",
       "default": "./dist/pure.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -39,9 +40,6 @@
     "*.mjs",
     "dist"
   ],
-  "engines": {
-    "node": "^18.0.0 || >=20.0.0"
-  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch --sourcemap",
@@ -52,8 +50,7 @@
     "lint:fix": "pnpm lint --fix"
   },
   "peerDependencies": {
-    "@vitest/browser": "^2.1.0 || ^3.0.0 || ^4.0.0-0",
-    "vitest": "^2.1.0 || ^3.0.0 || ^4.0.0-0",
+    "vitest": "^4.0.0-0",
     "vue": "^3.0.0"
   },
   "dependencies": {
@@ -62,15 +59,15 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.1",
     "@vitejs/plugin-vue": "^5.1.2",
-    "@vitest/browser": "^3.0.0",
+    "@vitest/browser-playwright": "^4.0.0-beta.15",
     "bumpp": "^9.4.2",
     "changelogithub": "^0.13.9",
     "eslint": "^9.8.0",
-    "playwright": "^1.46.0",
+    "playwright": "^1.55.1",
     "tsup": "^8.2.4",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4",
-    "vitest": "^3.0.0",
+    "vitest": "^4.0.0-beta.15",
     "vue": "^3.4.35",
     "zx": "^8.1.4"
   }

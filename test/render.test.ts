@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { page } from '@vitest/browser/context'
+import { page } from 'vitest/browser'
 import { config, render } from 'vitest-browser-vue'
 import HelloWorld from './fixtures/HelloWorld.vue'
 import Slot from './fixtures/Slot.vue'

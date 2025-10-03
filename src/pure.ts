@@ -1,10 +1,11 @@
-import type { Locator, LocatorSelectors } from '@vitest/browser/context'
-import { page } from '@vitest/browser/context'
+import type { Locator, LocatorSelectors, PrettyDOMOptions } from 'vitest/browser'
+import { page, utils } from 'vitest/browser'
 import { type ComponentMountingOptions, type VueWrapper, mount } from '@vue/test-utils'
 import type { DefineComponent } from 'vue'
-import { type PrettyDOMOptions, debug, getElementLocatorSelectors } from '@vitest/browser/utils'
 
 export { config } from '@vue/test-utils'
+
+const { debug, getElementLocatorSelectors } = utils
 
 type ComponentProps<T> = T extends new (...angs: any) => {
   $props: infer P
