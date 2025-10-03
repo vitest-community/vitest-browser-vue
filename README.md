@@ -2,7 +2,7 @@
 
 Render Vue components in Vitest Browser Mode. This library follows [`testing-library` principles](https://testing-library.com/docs/guiding-principles/) and exposes only [locators](https://vitest.dev/guide/browser/locators) and utilities that encourage you to write tests that closely resemble how your Vue components are used.
 
-Requires `vitest` and `@vitest/browser` 2.1.0 or higher.
+Requires `vitest` 4.0.0 or higher.
 
 ```ts
 import { render } from 'vitest-browser-vue'
@@ -34,15 +34,14 @@ export default defineConfig({
     // import `vitest-browser-vue` manually so TypeScript can pick it up
     setupFiles: ['vitest-browser-vue'],
     browser: {
-      name: 'chromium',
-      enabled: true,
+      // ... your config
     },
   },
 })
 ```
 
 ```ts
-import { page } from '@vitest/browser/context'
+import { page } from 'vitest/browser'
 
 test('counter button increments the count', async () => {
   const screen = page.render(Component, {
