@@ -4,16 +4,16 @@
   "version": "2.0.0",
   "packageManager": "pnpm@9.6.0",
   "description": "Render Vue components in Vitest Browser Mode",
-  "author": "Vitest Team",
+  "author": "Vitest Community",
   "license": "MIT",
   "funding": "https://opencollective.com/vitest",
-  "homepage": "https://github.com/vitest-dev/vitest-browser-vue#readme",
+  "homepage": "https://github.com/vitest-community/vitest-browser-vue#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vitest-dev/vitest-browser-vue.git"
+    "url": "git+https://github.com/vitest-community/vitest-browser-vue.git"
   },
   "bugs": {
-    "url": "https://github.com/vitest-dev/vitest-browser-vue/issues"
+    "url": "https://github.com/vitest-community/vitest-browser-vue/issues"
   },
   "keywords": [
     "vue",
