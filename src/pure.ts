@@ -14,10 +14,11 @@ type ComponentProps<T> = T extends new (...angs: any) => {
 
 const mountedWrappers = new Set<VueWrapper>()
 
-export interface RenderResult<Props> extends LocatorSelectors {
+export interface RenderResult<Props, Component> extends LocatorSelectors {
   container: HTMLElement
   baseElement: HTMLElement
   locator: Locator
+  vm: ReturnType<typeof mount<Component>>['vm']
   debug(el?: HTMLElement | HTMLElement[] | Locator | Locator[], maxLength?: number, options?: PrettyDOMOptions): void
   unmount(): void
   emitted<T = unknown>(): Record<string, T[]>
@@ -41,7 +42,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     baseElement: customBaseElement,
     ...mountOptions
   }: ComponentRenderOptions<C, P> = {},
-): RenderResult<P> {
+): RenderResult<P, T> {
   const div = document.createElement('div')
   const baseElement = customBaseElement || customContainer || document.body
   const container = customContainer || baseElement.appendChild(div)
@@ -65,6 +66,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     container,
     baseElement,
     locator: page.elementLocator(container),
+    vm: wrapper.vm as any,
     debug: (el = baseElement, maxLength, options) => debug(el, maxLength, options),
     unmount: () => wrapper.unmount(),
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
