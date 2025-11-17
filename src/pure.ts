@@ -7,7 +7,7 @@ export { config } from '@vue/test-utils'
 
 const { debug, getElementLocatorSelectors } = utils
 
-type ComponentProps<T> = T extends new (...angs: any) => {
+type ComponentProps<T> = T extends new (...args: any) => {
   $props: infer P
 // eslint-disable-next-line ts/no-empty-object-type
 } ? NonNullable<P> : T extends (props: infer P, ...args: any) => any ? P : {}
