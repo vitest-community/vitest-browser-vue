@@ -1,5 +1,5 @@
 import type { Locator, LocatorSelectors, PrettyDOMOptions } from 'vitest/browser'
-import { page, utils } from 'vitest/browser'
+import { page, server, utils } from 'vitest/browser'
 import { type ComponentMountingOptions, type VueWrapper, mount } from '@vue/test-utils'
 import type { DefineComponent } from 'vue'
 
@@ -30,6 +30,14 @@ export interface ComponentRenderOptions<C, P extends ComponentProps<C>> extends 
   baseElement?: HTMLElement
 }
 
+let idx = 0
+function ensureTestIdAttribute(element: HTMLElement) {
+  const attributeId = server.config.browser.locators.testIdAttribute
+  if (!element.hasAttribute(attributeId)) {
+    element.setAttribute(attributeId, `__vitest_${idx++}__`)
+  }
+}
+
 export function render<T, C = T extends ((...args: any) => any) | (new (...args: any) => any) ? T : T extends {
   props?: infer Props
 } ? DefineComponent<Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[] ? {
@@ -42,9 +50,13 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     ...mountOptions
   }: ComponentRenderOptions<C, P> = {},
 ): RenderResult<P> {
-  const div = document.createElement('div')
   const baseElement = customBaseElement || customContainer || document.body
-  const container = customContainer || baseElement.appendChild(div)
+  const container = customContainer || baseElement.appendChild(document.createElement('div'))
+
+  // Ensuring testid attributes exists so that the generated locators will be stable
+  // https://github.com/vitest-community/vitest-browser-react/issues/42
+  ensureTestIdAttribute(baseElement)
+  ensureTestIdAttribute(container)
 
   if (mountOptions.attachTo) {
     throw new Error('`attachTo` is not supported, use `container` instead')

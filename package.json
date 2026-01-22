@@ -59,7 +59,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.24.1",
     "@vitejs/plugin-vue": "^6.0.1",
-    "@vitest/browser-playwright": "^4.0.2",
+    "@vitest/browser-playwright": "^4.0.18",
     "bumpp": "^9.4.2",
     "changelogithub": "^0.13.9",
     "eslint": "^9.8.0",
@@ -67,7 +67,7 @@
     "tsdown": "^0.15.9",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4",
-    "vitest": "^4.0.2",
+    "vitest": "^4.0.18",
     "vue": "^3.4.35",
     "zx": "^8.1.4"
   }
