@@ -22,7 +22,7 @@ export interface RenderResult<Props> extends LocatorSelectors {
   unmount(): void
   emitted<T = unknown>(): Record<string, T[]>
   emitted<T = unknown[]>(eventName: string): undefined | T[]
-  rerender(props: Partial<Props>): void
+  rerender(props: Partial<Props>): Promise<void>
 }
 
 export interface ComponentRenderOptions<C, P extends ComponentProps<C>> extends ComponentMountingOptions<C, P> {
