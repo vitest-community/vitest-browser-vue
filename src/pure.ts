@@ -49,7 +49,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     baseElement: customBaseElement,
     ...mountOptions
   }: ComponentRenderOptions<C, P> = {},
-): RenderResult<P> {
+): RenderResult<P> & PromiseLike<RenderResult<P>> {
   const baseElement = customBaseElement || customContainer || document.body
   const container = customContainer || baseElement.appendChild(document.createElement('div'))
 
@@ -73,7 +73,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
 
   mountedWrappers.add(wrapper as any)
 
-  return {
+  const renderResult: RenderResult<P> = {
     container,
     baseElement,
     locator: page.elementLocator(container),
@@ -82,7 +82,31 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
     rerender: props => wrapper.setProps(props as any),
     ...getElementLocatorSelectors(baseElement),
+  };
+  // implement auto trace marking when users called `then` i.e. `await render(...)`
+  const renderResultPromiseLike: PromiseLike<RenderResult<P>> = {
+    async then(onfulfilled, onrejected) {
+      try {
+        await mark(renderResult.locator, 'vue.render', renderResultPromiseLike.then);
+        return Promise.resolve(renderResult).then(onfulfilled, onrejected)
+      } catch (e) {
+        return Promise.reject(e).then(onfulfilled, onrejected)
+      }
+    }
   }
+  return { ...renderResult, ...renderResultPromiseLike  }
+}
+
+function mark(locator: Locator, name: string, fn: Function) {
+  if (!locator.mark) {
+    return
+  }
+
+  const error = new Error(name)
+  if ('captureStackTrace' in Error) {
+    (Error as any).captureStackTrace(error, fn)
+  }
+  return locator.mark(name, error)
 }
 
 export function cleanup(): void {

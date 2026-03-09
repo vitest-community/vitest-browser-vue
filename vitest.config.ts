@@ -25,5 +25,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['vitest-browser-vue'],
+    force: true,
   },
 })
