@@ -82,19 +82,20 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
     rerender: props => wrapper.setProps(props as any),
     ...getElementLocatorSelectors(baseElement),
-  };
+  }
   // implement auto trace marking when users called `then` i.e. `await render(...)`
   const renderResultPromiseLike: PromiseLike<RenderResult<P>> = {
     async then(onfulfilled, onrejected) {
       try {
-        await mark(renderResult.locator, 'vue.render', renderResultPromiseLike.then);
+        await mark(renderResult.locator, 'vue.render', renderResultPromiseLike.then)
         return Promise.resolve(renderResult).then(onfulfilled, onrejected)
-      } catch (e) {
+      }
+      catch (e) {
         return Promise.reject(e).then(onfulfilled, onrejected)
       }
-    }
+    },
   }
-  return { ...renderResult, ...renderResultPromiseLike  }
+  return { ...renderResult, ...renderResultPromiseLike }
 }
 
 function mark(locator: Locator, name: string, fn: Function) {
