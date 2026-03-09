@@ -19,9 +19,11 @@ export interface RenderResult<Props> extends LocatorSelectors {
   baseElement: HTMLElement
   locator: Locator
   debug(el?: HTMLElement | HTMLElement[] | Locator | Locator[], maxLength?: number, options?: PrettyDOMOptions): void
+  /** Unmount the component. Can be awaited to record a `vue.unmount` trace mark. */
   unmount(): void & PromiseLike<void>
   emitted<T = unknown>(): Record<string, T[]>
   emitted<T = unknown[]>(eventName: string): undefined | T[]
+  /** Update the component props. Can be awaited to record a `vue.rerender` trace mark. */
   rerender(props: Partial<Props>): void & PromiseLike<void>
 }
 
@@ -38,6 +40,10 @@ function ensureTestIdAttribute(element: HTMLElement) {
   }
 }
 
+/**
+ * Render a Vue component into the document.
+ * Can be awaited to record a `vue.render` trace mark.
+ */
 export function render<T, C = T extends ((...args: any) => any) | (new (...args: any) => any) ? T : T extends {
   props?: infer Props
 } ? DefineComponent<Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[] ? {
