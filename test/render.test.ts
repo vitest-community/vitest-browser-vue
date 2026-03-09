@@ -79,4 +79,10 @@ test('trace mark with await', async () => {
   await expect.element(screen.getByText('Count is 1')).toBeVisible()
   await screen.getByRole('button', { name: 'Increment' }).click()
   await expect.element(screen.getByText('Count is 2')).toBeVisible()
+
+  await screen.rerender({ initialCount: -1 }) // doesn't matter
+  await expect.element(screen.getByText('Count is 2')).toBeVisible()
+
+  await screen.unmount()
+  expect(screen.container.innerHTML).toBe('')
 })
