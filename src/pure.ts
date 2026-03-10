@@ -19,10 +19,22 @@ export interface RenderResult<Props> extends LocatorSelectors {
   baseElement: HTMLElement
   locator: Locator
   debug(el?: HTMLElement | HTMLElement[] | Locator | Locator[], maxLength?: number, options?: PrettyDOMOptions): void
-  unmount(): void
+  /**
+   * Unmount the component. Also records a `vue.unmount` trace mark.
+   *
+   * Synchronous usage is deprecated and will be removed in the next major version.
+   * Please use `await unmount()` instead of `unmount()`.
+   */
+  unmount(): Promise<void>
   emitted<T = unknown>(): Record<string, T[]>
   emitted<T = unknown[]>(eventName: string): undefined | T[]
-  rerender(props: Partial<Props>): void
+  /**
+   * Update the component props. Also records a `vue.rerender` trace mark.
+   *
+   * Synchronous usage is deprecated and will be removed in the next major version.
+   * Please use `await rerender(props)` instead of `rerender(props)`.
+   */
+  rerender(props: Partial<Props>): Promise<void>
 }
 
 export interface ComponentRenderOptions<C, P extends ComponentProps<C>> extends ComponentMountingOptions<C, P> {
@@ -38,6 +50,13 @@ function ensureTestIdAttribute(element: HTMLElement) {
   }
 }
 
+/**
+ * Render a Vue component into the document.
+ * Also records a `vue.render` trace mark.
+ *
+ * Synchronous usage is deprecated and will be removed in the next major version.
+ * Please use `await render(Component)` instead of `render(Component)`.
+ */
 export function render<T, C = T extends ((...args: any) => any) | (new (...args: any) => any) ? T : T extends {
   props?: infer Props
 } ? DefineComponent<Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[] ? {
@@ -49,7 +68,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     baseElement: customBaseElement,
     ...mountOptions
   }: ComponentRenderOptions<C, P> = {},
-): RenderResult<P> {
+): RenderResult<P> & PromiseLike<RenderResult<P>> {
   const baseElement = customBaseElement || customContainer || document.body
   const container = customContainer || baseElement.appendChild(document.createElement('div'))
 
@@ -73,15 +92,44 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
 
   mountedWrappers.add(wrapper as any)
 
-  return {
+  const renderResult: RenderResult<P> = {
     container,
     baseElement,
     locator: page.elementLocator(container),
     debug: (el = baseElement, maxLength, options) => debug(el, maxLength, options),
-    unmount: () => wrapper.unmount(),
+    unmount: () => {
+      wrapper.unmount()
+      return markThenable(renderResult.locator, 'vue.unmount', renderResult.unmount, undefined) as any
+    },
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
-    rerender: props => wrapper.setProps(props as any),
+    rerender: async (props) => {
+      await wrapper.setProps(props as any)
+      return markThenable(renderResult.locator, 'vue.rerender', renderResult.rerender, undefined) as any
+    },
     ...getElementLocatorSelectors(baseElement),
+  }
+  return { ...renderResult, ...markThenable(renderResult.locator, 'vue.render', render, renderResult) }
+}
+
+// implement auto trace marking when users called `then` i.e. `await render(...)`
+function markThenable<T>(locator: Locator, name: string, fn: Function, value: T): PromiseLike<T> {
+  if (!locator.mark) {
+    return Promise.resolve(value)
+  }
+  const error = new Error(name)
+  if ('captureStackTrace' in Error) {
+    (Error as any).captureStackTrace(error, fn)
+  }
+  return {
+    async then(onfulfilled, onrejected) {
+      try {
+        await locator.mark(name, error)
+        return Promise.resolve(value).then(onfulfilled, onrejected)
+      }
+      catch (e) {
+        return Promise.reject(e).then(onfulfilled, onrejected)
+      }
+    },
   }
 }
 

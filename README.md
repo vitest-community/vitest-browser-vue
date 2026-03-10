@@ -9,7 +9,7 @@ import { render } from 'vitest-browser-vue'
 import { expect, test } from 'vitest'
 
 test('counter button increments the count', async () => {
-  const screen = render(Component, {
+  const screen = await render(Component, {
     props: {
       initialCount: 1,
     }
@@ -44,7 +44,7 @@ export default defineConfig({
 import { page } from 'vitest/browser'
 
 test('counter button increments the count', async () => {
-  const screen = page.render(Component, {
+  const screen = await page.render(Component, {
     props: {
       initialCount: 1,
     }

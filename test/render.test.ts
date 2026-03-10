@@ -65,3 +65,24 @@ test('renders async component', async () => {
   })
   await expect.element(screen.getByText('Hello Async World')).toBeVisible()
 })
+
+// test trace output by:
+// pnpm test render.test.ts --browser=chromium -t trace --browser.trace=on --run
+// pnpm playwright show-trace test/__traces__/render.test.ts/vue--chromium--trace-mark-with-await-0-0.trace.zip
+test('trace mark with await', async () => {
+  const screen = await render(Counter, {
+    props: {
+      initialCount: 1,
+    },
+  })
+
+  await expect.element(screen.getByText('Count is 1')).toBeVisible()
+  await screen.getByRole('button', { name: 'Increment' }).click()
+  await expect.element(screen.getByText('Count is 2')).toBeVisible()
+
+  await screen.rerender({ initialCount: -1 }) // doesn't matter
+  await expect.element(screen.getByText('Count is 2')).toBeVisible()
+
+  await screen.unmount()
+  expect(screen.container.innerHTML).toBe('')
+})
