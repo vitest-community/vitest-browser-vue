@@ -19,12 +19,22 @@ export interface RenderResult<Props> extends LocatorSelectors {
   baseElement: HTMLElement
   locator: Locator
   debug(el?: HTMLElement | HTMLElement[] | Locator | Locator[], maxLength?: number, options?: PrettyDOMOptions): void
-  /** Unmount the component. Can be awaited to record a `vue.unmount` trace mark. */
-  unmount(): void & PromiseLike<void>
+  /**
+   * Unmount the component. Also records a `vue.unmount` trace mark.
+   *
+   * Synchronous usage is deprecated and will be removed in the next major version.
+   * Please use `await unmount()` instead of `unmount()`.
+   */
+  unmount(): Promise<void>
   emitted<T = unknown>(): Record<string, T[]>
   emitted<T = unknown[]>(eventName: string): undefined | T[]
-  /** Update the component props. Can be awaited to record a `vue.rerender` trace mark. */
-  rerender(props: Partial<Props>): void & PromiseLike<void>
+  /**
+   * Update the component props. Also records a `vue.rerender` trace mark.
+   *
+   * Synchronous usage is deprecated and will be removed in the next major version.
+   * Please use `await rerender(props)` instead of `rerender(props)`.
+   */
+  rerender(props: Partial<Props>): Promise<void>
 }
 
 export interface ComponentRenderOptions<C, P extends ComponentProps<C>> extends ComponentMountingOptions<C, P> {
@@ -42,7 +52,10 @@ function ensureTestIdAttribute(element: HTMLElement) {
 
 /**
  * Render a Vue component into the document.
- * Can be awaited to record a `vue.render` trace mark.
+ * Also records a `vue.render` trace mark.
+ *
+ * Synchronous usage is deprecated and will be removed in the next major version.
+ * Please use `await render(Component)` instead of `render(Component)`.
  */
 export function render<T, C = T extends ((...args: any) => any) | (new (...args: any) => any) ? T : T extends {
   props?: infer Props
@@ -89,8 +102,8 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
       return markThenable(renderResult.locator, 'vue.unmount', renderResult.unmount, undefined) as any
     },
     emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
-    rerender: (props) => {
-      wrapper.setProps(props as any)
+    rerender: async (props) => {
+      await wrapper.setProps(props as any)
       return markThenable(renderResult.locator, 'vue.rerender', renderResult.rerender, undefined) as any
     },
     ...getElementLocatorSelectors(baseElement),
