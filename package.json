@@ -1,7 +1,7 @@
 {
   "name": "vitest-browser-vue",
   "type": "module",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "packageManager": "pnpm@10.31.0+sha512.e3927388bfaa8078ceb79b748ffc1e8274e84d75163e67bc22e06c0d3aed43dd153151cbf11d7f8301ff4acb98c68bdc5cadf6989532801ffafe3b3e4a63c268",
   "description": "Render Vue components in Vitest Browser Mode",
   "author": "Vitest Community",
