@@ -1,5 +1,7 @@
 # vitest-browser-vue
 
+[Docs](https://vitest.dev/api/browser/vue.html) | [Package](https://npmx.dev/package/vitest-browser-vue)
+
 Render Vue components in Vitest Browser Mode. This library follows [`testing-library` principles](https://testing-library.com/docs/guiding-principles/) and exposes only [locators](https://vitest.dev/guide/browser/locators) and utilities that encourage you to write tests that closely resemble how your Vue components are used.
 
 Requires `vitest` 4.0.0 or higher.
