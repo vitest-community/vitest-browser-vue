@@ -9,6 +9,7 @@ export default defineConfig({
     browser: {
       enabled: true,
       headless: true,
+      traceView: true,
       provider: playwright(),
       instances: [
         {
