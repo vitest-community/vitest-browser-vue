@@ -66,10 +66,7 @@ test('renders async component', async () => {
   await expect.element(screen.getByText('Hello Async World')).toBeVisible()
 })
 
-// test trace output by:
-// pnpm test render.test.ts --browser=chromium -t trace --browser.trace=on --run
-// pnpm playwright show-trace test/__traces__/render.test.ts/vue--chromium--trace-mark-with-await-0-0.trace.zip
-test('trace mark with await', async () => {
+test('trace mark', async () => {
   const screen = await render(Counter, {
     props: {
       initialCount: 1,
