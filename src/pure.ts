@@ -1,9 +1,22 @@
 import type { Locator, LocatorSelectors, PrettyDOMOptions } from 'vitest/browser'
 import { page, server, utils } from 'vitest/browser'
 import { type ComponentMountingOptions, type VueWrapper, mount } from '@vue/test-utils'
-import type { DefineComponent } from 'vue'
+import { type Component, type DefineComponent, defineComponent, h, nextTick, reactive } from 'vue'
 
 export { config } from '@vue/test-utils'
+
+/** Vue component rendered around the component under test. Must expose a default slot. */
+export type WrapperComponent = Component
+
+export interface RenderConfiguration {
+  wrapper?: WrapperComponent
+}
+
+const renderConfig: RenderConfiguration = {}
+
+export function configure(customConfig: Partial<RenderConfiguration>): void {
+  Object.assign(renderConfig, customConfig)
+}
 
 const { debug, getElementLocatorSelectors } = utils
 
@@ -40,6 +53,13 @@ export interface RenderResult<Props> extends LocatorSelectors {
 export interface ComponentRenderOptions<C, P extends ComponentProps<C>> extends ComponentMountingOptions<C, P> {
   container?: HTMLElement
   baseElement?: HTMLElement
+  /**
+   * Pass a Vue component as the `wrapper` option to have it rendered around the inner element.
+   * The wrapper must expose a default slot for the component under test.
+   *
+   * Per-render `wrapper` takes precedence over the value set via {@link configure}.
+   */
+  wrapper?: WrapperComponent
 }
 
 let idx = 0
@@ -47,6 +67,36 @@ function ensureTestIdAttribute(element: HTMLElement) {
   const attributeId = server.config.browser.locators.testIdAttribute
   if (!element.hasAttribute(attributeId)) {
     element.setAttribute(attributeId, `__vitest_${idx++}__`)
+  }
+}
+
+function wrapComponentIfNeeded<T, C, P extends ComponentProps<C>>(
+  Component: T,
+  wrapperComponent: WrapperComponent | undefined,
+  mountOptions: ComponentMountingOptions<C, P>,
+): WrappedMountTarget<T, C, P> {
+  if (!wrapperComponent) {
+    return { component: Component, mountOptions }
+  }
+
+  const { props, slots, ...restMountOptions } = mountOptions
+  const sutProps = reactive({ ...(props ?? {}) })
+
+  return {
+    component: defineComponent({
+      name: 'VitestBrowserVueWrapper',
+      setup() {
+        return () => h(
+          wrapperComponent,
+          null,
+          {
+            default: () => h(Component as Component, sutProps, slots),
+          },
+        )
+      },
+    }) as T,
+    mountOptions: restMountOptions,
+    sutProps,
   }
 }
 
@@ -66,6 +116,7 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
   {
     container: customContainer,
     baseElement: customBaseElement,
+    wrapper: wrapperOption,
     ...mountOptions
   }: ComponentRenderOptions<C, P> = {},
 ): RenderResult<P> & PromiseLike<RenderResult<P>> {
@@ -81,16 +132,23 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     throw new Error('`attachTo` is not supported, use `container` instead')
   }
 
-  const wrapper = mount(Component, {
-    ...mountOptions,
+  const wrapperComponent = wrapperOption ?? renderConfig.wrapper
+  const { component: componentToMount, mountOptions: finalMountOptions, sutProps } = wrapComponentIfNeeded(
+    Component,
+    wrapperComponent,
+    mountOptions,
+  )
+
+  const mounted = mount(componentToMount, {
+    ...finalMountOptions,
     attachTo: container,
   })
 
   // this removes the additional wrapping div node from VTU:
   // https://github.com/vuejs/vue-test-utils-next/blob/master/src/mount.ts#L309
-  unwrapNode((wrapper as any).parentElement)
+  unwrapNode((mounted as any).parentElement)
 
-  mountedWrappers.add(wrapper as any)
+  mountedWrappers.add(mounted as any)
 
   const renderResult: RenderResult<P> = {
     container,
@@ -98,12 +156,22 @@ export function render<T, C = T extends ((...args: any) => any) | (new (...args:
     locator: page.elementLocator(container),
     debug: (el = baseElement, maxLength, options) => debug(el, maxLength, options),
     unmount: () => {
-      wrapper.unmount()
+      mounted.unmount()
       return markThenable(renderResult.locator, 'vue.unmount', renderResult.unmount, undefined) as any
     },
-    emitted: ((name?: string) => wrapper.emitted(name as string)) as any,
+    emitted: ((name?: string) => resolveEmittedWrapper(
+      mounted,
+      Component as Component,
+      sutProps != null,
+    ).emitted(name as string)) as any,
     rerender: async (props) => {
-      await wrapper.setProps(props as any)
+      if (sutProps) {
+        Object.assign(sutProps, props)
+        await nextTick()
+      }
+      else {
+        await mounted.setProps(props as any)
+      }
       return markThenable(renderResult.locator, 'vue.rerender', renderResult.rerender, undefined) as any
     },
     ...getElementLocatorSelectors(baseElement),
@@ -146,4 +214,19 @@ export function cleanup(): void {
 
 function unwrapNode(node: Element) {
   node.replaceWith(...node.childNodes)
+}
+
+interface WrappedMountTarget<T, C, P extends ComponentProps<C>> {
+  component: T
+  mountOptions: Omit<ComponentMountingOptions<C, P>, 'props' | 'slots'>
+  sutProps?: Record<string, unknown>
+}
+
+function resolveEmittedWrapper(mounted: VueWrapper, Component: Component, fromSut: boolean): VueWrapper {
+  if (!fromSut) {
+    return mounted
+  }
+
+  const sut = mounted.findComponent(Component)
+  return sut.exists() ? sut : mounted
 }
