@@ -72,8 +72,6 @@ config.global.mocks = {
 
 ### Wrapper
 
-Parity with [`vitest-browser-react` `wrapper` option](https://vitest.dev/api/browser/react#wrapper).
-
 Pass a Vue component as the `wrapper` option to render it around the component under test. The wrapper must expose a default slot. This is useful for reusable provider setup (for example `UApp`, `ElConfigProvider`, or your own context providers).
 
 Per-render `wrapper` takes precedence over the value set via `configure`.
