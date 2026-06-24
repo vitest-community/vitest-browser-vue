@@ -1,11 +1,10 @@
 import { afterEach, expect, test } from 'vitest'
 import { configure, render } from 'vitest-browser-vue'
-import Label from './fixtures/Label.vue'
-import Provider from './fixtures/Provider.vue'
 import Emitter from './fixtures/Emitter.vue'
 import InnerProvider from './fixtures/InnerProvider.vue'
-import NoSlotProvider from './fixtures/NoSlotProvider.vue'
+import Label from './fixtures/Label.vue'
 import OuterProvider from './fixtures/OuterProvider.vue'
+import Provider from './fixtures/Provider.vue'
 import Slot from './fixtures/Slot.vue'
 
 afterEach(() => {
@@ -90,16 +89,33 @@ test('emitted() reads from the component under test when wrapper is used', async
   expect(screen.emitted('submit')).toEqual([['ok']])
 })
 
-test('wrapper without a default slot does not render the component under test', async () => {
-  const screen = await render(Label, {
-    wrapper: NoSlotProvider,
+test('emitted() returns undefined when the event was not emitted', async () => {
+  const screen = await render(Emitter, {
+    wrapper: Provider,
+  })
+
+  expect(screen.emitted('submit')).toBeUndefined()
+})
+
+test('configure({ wrapper: undefined }) clears the global wrapper', async () => {
+  configure({ wrapper: Provider })
+
+  await render(Label, {
     props: {
-      label: 'Hidden label',
+      label: 'Wrapped once',
     },
   })
 
-  await expect.element(screen.getByText('Wrapper without slot')).toBeVisible()
-  expect(screen.container.textContent).not.toContain('Hidden label')
+  configure({ wrapper: undefined })
+
+  const screen = await render(Label, {
+    props: {
+      label: 'Unwrapped',
+    },
+  })
+
+  expect(screen.container.querySelector('[data-provider="true"]')).toBeNull()
+  await expect.element(screen.getByText('Unwrapped')).toBeVisible()
 })
 
 test('wrapper: undefined does not disable a globally configured wrapper', async () => {
@@ -114,6 +130,16 @@ test('wrapper: undefined does not disable a globally configured wrapper', async 
 
   expect(screen.container.querySelector('[data-provider="true"]')).not.toBeNull()
   await expect.element(screen.getByText('Still wrapped')).toBeVisible()
+})
+
+test('throws when attachTo is combined with wrapper', () => {
+  expect(() => render(Label, {
+    wrapper: Provider,
+    attachTo: document.body,
+    props: {
+      label: 'Nope',
+    },
+  })).toThrow('`attachTo` is not supported, use `container` instead')
 })
 
 test('rerender does not remount or alter the wrapper component', async () => {

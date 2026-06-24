@@ -9,11 +9,17 @@ export { config } from '@vue/test-utils'
 export type WrapperComponent = Component
 
 export interface RenderConfiguration {
+  /** Default wrapper component rendered around the component under test. */
   wrapper?: WrapperComponent
 }
 
 const renderConfig: RenderConfiguration = {}
 
+/**
+ * Configure vitest-browser-vue options globally.
+ *
+ * Available from `vitest-browser-vue/pure` (recommended in setup files).
+ */
 export function configure(customConfig: Partial<RenderConfiguration>): void {
   Object.assign(renderConfig, customConfig)
 }
